@@ -14,18 +14,47 @@ namespace Persistencia.entidades;
         
         set
         {
-             if (value < 0 || value > 5000)
+             if (value < 0 || value > 50)
             {
                 throw new ArgumentOutOfRangeException("peso invalido");
             }
         }
          }
     
-    public double Alto { get; set; }
+    private double alto; 
+    public double Alto { 
+        get => alto;
+        set
+        {
+            if (value < 0 || value > 20)
+            {
+                throw new ArgumentOutOfRangeException("meidida invalida");
+            }
+        }
+         }
 
-    public double Ancho { get; set; }
-
-    public double Largo { get; set; }
+    private double ancho;
+    public double Ancho { 
+        get=> ancho;
+        set
+        {
+            if (value < 0 || value > 20)
+            {
+                throw new ArgumentOutOfRangeException("medida invalida");
+            }
+        }
+         }
+    private double largo;
+    public double Largo { 
+        get=> largo;
+        set
+        {
+            if (value < 0 || value > 20)
+            {
+                throw new ArgumentOutOfRangeException("medida invalida");
+            }
+        }
+         }
 
     public Paquete(double peso, double alto, double ancho, double largo)
     {

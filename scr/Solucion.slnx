@@ -3,4 +3,5 @@
     <Project Path="Tests/Test.csproj" />
   </Folder>
   <Project Path="Aplicacion/Aplicacion.csproj" />
+  <Project Path="Persistencia/Persistencia.csproj" />
 </Solution>
