@@ -1,5 +1,4 @@
-namespace Persistencia.entidades;
-
+namespace Persistencia.Entidades;
     public abstract class Envio
     {
     public int Id { get; set; }

@@ -3,15 +3,15 @@ CREATE DATABASE db_envios;
 USE db_envios;
 CREATE TABLE Cliente (
     IdCliente INT AUTO_INCREMENT PRIMARY KEY,
-    Nombre VARCHAR(100) NOT NULL,
-    Email VARCHAR(150) NOT NULL ,
+    Nombre VARCHAR(45) NOT NULL,
+    Email VARCHAR(45) NOT NULL ,
     
 );
 CREATE TABLE Direccion (
     IdDireccion INT AUTO_INCREMENT PRIMARY KEY,
-    Calle VARCHAR(150) NOT NULL,
-    Numero VARCHAR(10) NOT NULL,
-    Ciudad VARCHAR(100) NOT NULL
+    Calle VARCHAR(45) NOT NULL,
+    Numero VARCHAR(45) NOT NULL,
+    Ciudad VARCHAR(45) NOT NULL
   
 );
 CREATE TABLE Paquete (
@@ -36,7 +36,7 @@ CREATE TABLE Envio (
 
     FechaCreacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    Estado VARCHAR(30) NOT NULL DEFAULT 'Pendiente',
+    Estado VARCHAR(45) NOT NULL DEFAULT 'Pendiente',
 
     CONSTRAINT FK_Envio_Cliente
         FOREIGN KEY (IdCliente)
@@ -69,8 +69,8 @@ CREATE TABLE HistorialEstado (
 
     IdEnvio INT NOT NULL,
 
-    EstadoAnterior VARCHAR(30),
-    EstadoNuevo VARCHAR(30) NOT NULL,
+    EstadoAnterior VARCHAR(45),
+    EstadoNuevo VARCHAR(45) NOT NULL,
 
     FechaCambio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

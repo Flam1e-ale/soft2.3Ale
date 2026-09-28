@@ -1,5 +1,4 @@
-namespace Persistencia.entidades;
-
+namespace Persistencia.Entidades;
     public class EnvioExpress:Envio
     {
 

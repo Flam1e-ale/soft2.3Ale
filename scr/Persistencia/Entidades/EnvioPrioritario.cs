@@ -1,5 +1,4 @@
-namespace Persistencia.entidades;
-
+namespace Persistencia.Entidades;
     public class EnvioPrioritario:Envio
     {
         public EnvioPrioritario(int id, Cliente cliente, Paquete paquete, Direccion origen,

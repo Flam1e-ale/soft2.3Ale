@@ -1,4 +1,4 @@
-namespace Persistencia.entidades;
+namespace Persistencia.Entidades;
 
     public class Cliente
     {

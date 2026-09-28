@@ -1,7 +1,6 @@
 using System.IO.Pipes;
 
-namespace Persistencia.entidades;
-
+namespace Persistencia.Entidades;
     public class Paquete
     {
     
@@ -18,6 +17,7 @@ namespace Persistencia.entidades;
             {
                 throw new ArgumentOutOfRangeException("peso invalido");
             }
+            peso=value;
         }
          }
     
@@ -30,6 +30,7 @@ namespace Persistencia.entidades;
             {
                 throw new ArgumentOutOfRangeException("meidida invalida");
             }
+            alto=value;
         }
          }
 
@@ -42,6 +43,7 @@ namespace Persistencia.entidades;
             {
                 throw new ArgumentOutOfRangeException("medida invalida");
             }
+            ancho=value;
         }
          }
     private double largo;
@@ -53,6 +55,7 @@ namespace Persistencia.entidades;
             {
                 throw new ArgumentOutOfRangeException("medida invalida");
             }
+            largo=value;
         }
          }
 

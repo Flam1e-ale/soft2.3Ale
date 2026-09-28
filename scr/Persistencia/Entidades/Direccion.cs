@@ -1,5 +1,4 @@
-namespace Persistencia.entidades;
-
+namespace Persistencia.Entidades;
     public class Direccion
     {
     public int Id { get; set; }
@@ -37,8 +36,20 @@ namespace Persistencia.entidades;
             numero = value;
         }
     } 
+private string ciudad=null!;   
+  public string Ciudad 
+    {
+        get => ciudad;
+        set
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException("ciudad invalida");
+            }
+             ciudad = value;
+        }
 
-    public string Ciudad { get; set; }
+    }
 
     public Direccion(string calle, int numero, string ciudad)
     {

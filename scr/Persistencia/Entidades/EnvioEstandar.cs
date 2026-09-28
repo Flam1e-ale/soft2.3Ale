@@ -1,5 +1,4 @@
-namespace Persistencia.entidades;
-
+namespace Persistencia.Entidades;
     public class EnvioEstandar:Envio 
     {
         public EnvioEstandar( int id, Cliente cliente, Paquete paquete, Direccion origen,
