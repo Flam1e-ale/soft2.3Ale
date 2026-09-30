@@ -1,6 +1,5 @@
-using System.Diagnostics.Contracts;
-
-namespace Aplicacion;
+using Persistencia.Entidades;
+namespace Aplicacion.Servicios;
 
     public interface IPaqueteServicio
     {

@@ -1,6 +1,6 @@
 using Persistencia.Entidades;
-
-namespace Aplicacion.Repositorios;
+using Persistencia.Interfaces;
+namespace Persistencia.Repositorios;
 
 public class PaqueteRepositorio : IPaqueteRepositorio
 {

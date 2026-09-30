@@ -1,11 +1,7 @@
 
 using Persistencia.Entidades;
-using Aplicacion.interfaces
-{
-    
-}
-
-namespace Aplicacion.Repositorios;
+using Persistencia.Interfaces;
+namespace Persistencia.Repositorios;
 
 public class ClienteRepositorio : IClienteRepositorio
 {

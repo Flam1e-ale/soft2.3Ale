@@ -1,4 +1,5 @@
-namespace Aplicacion;
+using Persistencia.Entidades;
+namespace Aplicacion.Servicios;
 
     public interface IClienteServicio
     {

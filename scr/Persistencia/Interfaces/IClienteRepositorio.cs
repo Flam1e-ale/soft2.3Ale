@@ -1,6 +1,6 @@
 using Persistencia.Entidades;
 
-namespace Aplicacion.Repositorios;
+namespace Persistencia.Interfaces;
 
 public interface IClienteRepositorio
 {

@@ -1,7 +1,6 @@
-using Perisitencia.Entidades;
+using Persistencia.Entidades;
 
-namespace Aplicacion.Repositorios;
-
+namespace Persistencia.Interfaces;
 public interface IDireccionRepositorio
 {
     List<Direccion> ObtenerTodos();
