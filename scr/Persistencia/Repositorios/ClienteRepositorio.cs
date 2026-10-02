@@ -1,34 +1,29 @@
 
 using Persistencia.Entidades;
 using Persistencia.Interfaces;
+using MySqlConnector;
+using Dapper;
+using System.Data.Common;
 namespace Persistencia.Repositorios;
 
+
 public class ClienteRepositorio : IClienteRepositorio
-{
-    private readonly List<Cliente> clientes = new();
-
-    public List<Cliente> ObtenerTodos()
+{   
+    private readonly string _connectionString;
+    public ClienteRepositorio(string connetionString)
     {
-        return clientes;
-    }
-
-    public Cliente? ObtenerPorId(int id)
+        _connectionString=connetionString;
+    }  
+    public Cliente ObtenerPorId(int idCliente )
     {
-        return clientes.FirstOrDefault(c => c.Id == id);
-    }
+        using var connection = new MySqlConnection(_connectionString);
 
-    public void Agregar(Cliente cliente)
-    {
-        clientes.Add(cliente);
-    }
-
-    public void Eliminar(int id)
-    {
-        Cliente? cliente = ObtenerPorId(id);
-
-        if (cliente != null)
-        {
-            clientes.Remove(cliente);
-        }
+            string sql = @"
+                SELECT *
+                FROM Cliente
+                WHERE idCliente = @idCliente";
+            return connection.QueryFirstOrDefault<Cliente> 
+            (sql, new {idCliente});
+        
     }
 }

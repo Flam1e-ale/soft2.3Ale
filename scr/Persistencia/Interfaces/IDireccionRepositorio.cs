@@ -5,6 +5,7 @@ public interface IDireccionRepositorio
 {
     List<Direccion> ObtenerTodos();
     Direccion? ObtenerPorId(int id);
-    void Agregar(Direccion direccion);
+    int Crear(Direccion direccion);
+    void Actualizar(Direccion direccion);
     void Eliminar(int id);
 }

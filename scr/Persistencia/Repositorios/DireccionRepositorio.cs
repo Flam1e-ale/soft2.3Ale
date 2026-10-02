@@ -1,5 +1,7 @@
 using Persistencia.Entidades;
 using Persistencia.Interfaces;
+using MySqlConnector;
+using Dapper;
 namespace Persistencia.Repositorios;
 
 public class DireccionRepositorio : IDireccionRepositorio

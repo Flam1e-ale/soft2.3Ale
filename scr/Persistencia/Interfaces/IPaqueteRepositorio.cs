@@ -5,6 +5,7 @@ public interface IPaqueteRepositorio
 {
     List<Paquete> ObtenerTodos();
     Paquete? ObtenerPorId(int id);
-    void Agregar(Paquete paquete);
+     int Crear(Paquete paquete);
+    void Actualizar(Paquete paquete);
     void Eliminar(int id);
 }
