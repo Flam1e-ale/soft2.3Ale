@@ -4,15 +4,29 @@ using Aplicacion.InterfaceServicio;
 namespace Aplicacion.Servicios;
     public class ClienteServicio:IClienteServicio
     {
-        private readonly IClienteRepositorio clienteRepositorio;
+        private readonly IClienteRepositorio _clienteRepositorio;
 
         public ClienteServicio(IClienteRepositorio clienteRepositorio)
     {
-        this.clienteRepositorio=clienteRepositorio;   
+        _clienteRepositorio=clienteRepositorio;   
     }
-        public List<Cliente> ObtenerTodos()
+        public List<Cliente> ObtenerTodos() => _clienteRepositorio.ObtenerTodos();
+
+        public Cliente? ObtenerPorId(int id) => _clienteRepositorio.ObtenerPorId(id);
+
+        public int Crear(Cliente cliente)
     {
-         return clienteRepositorio.ObtenerTodos();
-    } 
+        if (cliente == null)
+            throw new ArgumentNullException(nameof(cliente));
+        return _clienteRepositorio.Crear(cliente);
+    }
+    public void Actualizar(Cliente cliente)
+    {
+        if (cliente == null)
+            throw new ArgumentNullException(nameof(cliente));
+        _clienteRepositorio.Actualizar(cliente);
+    }
+
+    public void Eliminar(int id) => _clienteRepositorio.Eliminar(id);
+    }
     
-}

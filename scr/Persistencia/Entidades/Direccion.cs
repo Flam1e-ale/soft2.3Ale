@@ -57,4 +57,5 @@ private string ciudad=null!;
         Numero = numero;
         Ciudad = ciudad;
     }
+    public Direccion() { }
     }

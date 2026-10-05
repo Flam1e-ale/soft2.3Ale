@@ -4,22 +4,22 @@ namespace Persistencia.Conexion;
 
     public class MySQLConnectionFactory:IDbConnectionFactory
     {
-        private readonly string connectionString;
-        private readonly string adminConnectionString;
+        private readonly string _connectionString;
+        private readonly string _adminConnectionString;
 
         
          public MySQLConnectionFactory(string connectionString,string adminConnectionString)
         {
-        this.connectionString = connectionString;
-        this.adminConnectionString=adminConnectionString;
+        _connectionString = connectionString ?? throw new ArgumentNullException(nameof(connectionString));
+        _adminConnectionString=adminConnectionString ?? throw new ArgumentNullException(nameof(adminConnectionString));
         }
 
         public IDbConnection CrearConexion()
         {
-        return new MySqlConnection(connectionString);
+        return new MySqlConnection(_connectionString);
         }
         public IDbConnection CrearConexionAdmin()
         {
-            return new MySqlConnection(adminConnectionString);
+            return new MySqlConnection(_adminConnectionString);
         }
 }

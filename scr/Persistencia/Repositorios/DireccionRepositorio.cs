@@ -1,21 +1,22 @@
 using Persistencia.Entidades;
 using Persistencia.Interfaces;
+using Persistencia.Conexion;
 using MySqlConnector;
 using Dapper;
 namespace Persistencia.Repositorios;
 
 public class DireccionRepositorio : IDireccionRepositorio
 {
-     private readonly string _connectionString;
+     private readonly IDbConnectionFactory _connectionFactory;
 
-        public DireccionRepositorio(string connectionString)
+        public DireccionRepositorio(IDbConnectionFactory connectionFactory)
         {
-            _connectionString = connectionString;
+            _connectionFactory = connectionFactory;
         }
 
         public Direccion? ObtenerPorId(int idDireccion)
     {
-        using var connection = new MySqlConnection(_connectionString);
+        using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 SELECT *
@@ -29,7 +30,7 @@ public class DireccionRepositorio : IDireccionRepositorio
     }
       public List<Direccion> ObtenerTodos()
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 SELECT *
@@ -39,7 +40,7 @@ public class DireccionRepositorio : IDireccionRepositorio
         }
          public int Crear(Direccion direccion)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 INSERT INTO Direccion
@@ -53,7 +54,7 @@ public class DireccionRepositorio : IDireccionRepositorio
         }
       public void Actualizar(Direccion direccion)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 UPDATE Direccion
@@ -66,7 +67,7 @@ public class DireccionRepositorio : IDireccionRepositorio
         }
         public void Eliminar(int idDireccion)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 DELETE FROM Direccion

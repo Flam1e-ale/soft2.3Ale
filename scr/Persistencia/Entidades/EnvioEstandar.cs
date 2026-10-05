@@ -9,13 +9,7 @@ namespace Persistencia.Entidades;
         Direccion origen,
         Direccion destino,
         double distancia)
-        : base(
-            id,
-            cliente,
-            paquete,
-            origen,
-            destino,
-            distancia)
+        : base(id,cliente, paquete, origen, destino, distancia)
     {
         
     }

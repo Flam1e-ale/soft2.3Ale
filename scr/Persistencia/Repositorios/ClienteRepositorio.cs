@@ -1,4 +1,5 @@
 using Persistencia.Entidades;
+using Persistencia.Conexion;
 using Persistencia.Interfaces;
 using MySqlConnector;
 using Dapper;
@@ -8,14 +9,14 @@ namespace Persistencia.Repositorios;
 
 public class ClienteRepositorio : IClienteRepositorio
 {   
-    private readonly string _connectionString;
-    public ClienteRepositorio(string connetionString)
+    private readonly IDbConnectionFactory _connectionFactory;
+    public ClienteRepositorio(IDbConnectionFactory ConnectionFactory)
     {
-        _connectionString=connetionString;
+        _connectionFactory=ConnectionFactory;
     }  
     public Cliente? ObtenerPorId(int idCliente )
     {
-        using var connection = new MySqlConnection(_connectionString);
+         using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 SELECT *
@@ -27,7 +28,7 @@ public class ClienteRepositorio : IClienteRepositorio
     }
     public List<Cliente> ObtenerTodos()
         {
-            using var connection = new MySqlConnection(_connectionString);
+             using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 SELECT *
@@ -35,9 +36,9 @@ public class ClienteRepositorio : IClienteRepositorio
 
             return connection.Query<Cliente>(sql).ToList();
         }
-     public int CrearCliente(Cliente cliente)
+     public int Crear(Cliente cliente)
         {
-            using var connection = new MySqlConnection(_connectionString);
+             using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 INSERT INTO Cliente (nombre, email)
@@ -49,7 +50,7 @@ public class ClienteRepositorio : IClienteRepositorio
         }
       public void Actualizar(Cliente cliente)
         {
-            using var connection = new MySqlConnection(_connectionString);
+             using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 UPDATE Cliente
@@ -61,8 +62,7 @@ public class ClienteRepositorio : IClienteRepositorio
         }
      public void Eliminar(int idCliente)
         {
-            using var connection = new MySqlConnection(_connectionString);
-
+            using var connection = _connectionFactory.CrearConexion();
             string sql = @"
                 DELETE FROM Cliente
                 WHERE idCliente = @idCliente";

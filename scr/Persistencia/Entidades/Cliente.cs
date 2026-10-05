@@ -38,4 +38,8 @@ namespace Persistencia.Entidades;
         Nombre = nombre;
         Email = email;
     }
+    public Cliente()
+    {
+        
+    }
     }

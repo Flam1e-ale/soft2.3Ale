@@ -66,5 +66,5 @@ namespace Persistencia.Entidades;
         Ancho=ancho;
         Largo=largo;
     }
-    
+    public Paquete() { }
     }   

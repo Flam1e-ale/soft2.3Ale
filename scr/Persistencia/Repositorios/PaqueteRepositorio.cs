@@ -1,19 +1,22 @@
 using Persistencia.Entidades;
 using Persistencia.Interfaces;
+using Persistencia.Conexion;
 using MySqlConnector;
 using Dapper;
 namespace Persistencia.Repositorios;
 
 public class PaqueteRepositorio : IPaqueteRepositorio
 {
-    private readonly string _connectionString;
-    public PaqueteRepositorio(string connectionString)
+    private readonly IDbConnectionFactory _connectionFactory;
+
+    public PaqueteRepositorio(IDbConnectionFactory connectionFactory)
     {
-        _connectionString=connectionString;
+        _connectionFactory = connectionFactory;
     }
+
      public Paquete? ObtenerPorId(int idPaquete)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 SELECT *
@@ -27,7 +30,7 @@ public class PaqueteRepositorio : IPaqueteRepositorio
 
         public List<Paquete> ObtenerTodos()
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 SELECT *
@@ -38,7 +41,7 @@ public class PaqueteRepositorio : IPaqueteRepositorio
 
         public int Crear(Paquete paquete)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 INSERT INTO Paquete
@@ -53,7 +56,7 @@ public class PaqueteRepositorio : IPaqueteRepositorio
 
         public void Actualizar(Paquete paquete)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 UPDATE Paquete
@@ -68,7 +71,7 @@ public class PaqueteRepositorio : IPaqueteRepositorio
 
         public void Eliminar(int idPaquete)
         {
-            using var connection = new MySqlConnection(_connectionString);
+            using var connection = _connectionFactory.CrearConexion();
 
             string sql = @"
                 DELETE FROM Paquete
