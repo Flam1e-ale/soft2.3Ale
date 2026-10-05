@@ -18,7 +18,7 @@ namespace Persistencia.Conexion;
         {
         return new MySqlConnection(connectionString);
         }
-        public IDbConnection CrearAdminConnecion()
+        public IDbConnection CrearConexionAdmin()
         {
             return new MySqlConnection(adminConnectionString);
         }

@@ -22,7 +22,7 @@ CREATE TABLE Cliente (
 CREATE TABLE Direccion (
     IdDireccion INT AUTO_INCREMENT PRIMARY KEY,
     Calle VARCHAR(45) NOT NULL,
-    Numero VARCHAR(45) NOT NULL,
+    Numero int NOT NULL,
     Ciudad VARCHAR(45) NOT NULL
 );
 
@@ -39,17 +39,18 @@ CREATE TABLE Paquete (
     Ancho DECIMAL(10,2) NOT NULL,
     Largo DECIMAL(10,2) NOT NULL,
 
-    CONSTRAINT CK_Paquete_Peso
-        CHECK (Peso > 0),
+     CONSTRAINT CK_Paquete_Peso
+        CHECK (Peso > 0 AND Peso <= 50),
 
     CONSTRAINT CK_Paquete_Alto
-        CHECK (Alto > 0),
+        CHECK (Alto > 0 AND Alto <= 20),
 
     CONSTRAINT CK_Paquete_Ancho
-        CHECK (Ancho > 0),
+        CHECK (Ancho > 0 AND Ancho <= 20),
 
     CONSTRAINT CK_Paquete_Largo
-        CHECK (Largo > 0)
+        CHECK (Largo > 0 AND Largo <= 20)
+
 );
 
 

@@ -1,8 +1,16 @@
 namespace Persistencia.Entidades;
     public class EnvioEstandar:Envio 
     {
-        public EnvioEstandar( int id, Cliente cliente, Paquete paquete, Direccion origen,
-         Direccion destino, double distancia):base(
+        public const int IdModalidad = 1;
+         public EnvioEstandar(
+        int id,
+        Cliente cliente,
+        Paquete paquete,
+        Direccion origen,
+        Direccion destino,
+        double distancia)
+        : base(
+            id,
             cliente,
             paquete,
             origen,
@@ -13,11 +21,11 @@ namespace Persistencia.Entidades;
     }
     public override double CalcularCosto()
     {
-        return 9;
+        return 1000 + (Paquete.Peso * 100) + (Distancia * 10);
     }
     public override int CalcularTiempoEntrega()
     {
-        return 8;
+        return 5;
     }
     }
     

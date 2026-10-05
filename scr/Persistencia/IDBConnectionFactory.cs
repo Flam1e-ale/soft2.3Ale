@@ -5,6 +5,6 @@ namespace Persistencia.Conexion;
     public interface IDbConnectionFactory
     {   
         IDbConnection CrearConexion();
-        IDbConnection CrearAdminConnecion();
+       IDbConnection CrearConexionAdmin();
 
     }
