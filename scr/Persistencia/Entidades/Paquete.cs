@@ -4,7 +4,7 @@ namespace Persistencia.Entidades;
     public class Paquete
     {
     
-    public int Id { get; set; }
+    public int IdPaquete { get; set; }
 
     private  double peso;
     public double Peso 
@@ -13,7 +13,7 @@ namespace Persistencia.Entidades;
         
         set
         {
-             if (value < 0 || value > 50)
+             if (value <= 0 || value > 50)
             {
                 throw new ArgumentOutOfRangeException("peso invalido");
             }
@@ -26,7 +26,7 @@ namespace Persistencia.Entidades;
         get => alto;
         set
         {
-            if (value < 0 || value > 20)
+            if (value <= 0 || value > 20)
             {
                 throw new ArgumentOutOfRangeException("meidida invalida");
             }
@@ -39,7 +39,7 @@ namespace Persistencia.Entidades;
         get=> ancho;
         set
         {
-            if (value < 0 || value > 20)
+            if (value <= 0 || value > 20)
             {
                 throw new ArgumentOutOfRangeException("medida invalida");
             }
@@ -51,7 +51,7 @@ namespace Persistencia.Entidades;
         get=> largo;
         set
         {
-            if (value < 0 || value > 20)
+            if (value <= 0 || value > 20)
             {
                 throw new ArgumentOutOfRangeException("medida invalida");
             }

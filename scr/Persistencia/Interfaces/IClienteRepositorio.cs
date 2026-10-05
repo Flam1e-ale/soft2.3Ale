@@ -6,7 +6,7 @@ public interface IClienteRepositorio
 {
     List<Cliente> ObtenerTodos();
     Cliente? ObtenerPorId(int id);
-    void CrearCliente(Cliente cliente);
+    int CrearCliente(Cliente cliente);
     void Actualizar(Cliente cliente);
     void Eliminar(int id);
 }

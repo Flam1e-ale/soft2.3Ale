@@ -1,20 +1,19 @@
 using Persistencia.Entidades;
+using Persistencia.Interfaces;
+using Aplicacion.InterfaceServicio;
 namespace Aplicacion.Servicios;
 
-    public interface IPaqueteServicio
-    {
-        List<Paquete> ObtenerTodos();
-    }
+
     public class PaqueteServicio:IPaqueteServicio
     {
-        private readonly IPaqueteServicio paqueteServicio;
+        private readonly IPaqueteRepositorio paqueteRepositorio;
 
-    public PaqueteServicio(PaqueteServicio paqueteServicio)
+    public PaqueteServicio(IPaqueteRepositorio paqueteRepositorio)
     {
-        this.paqueteServicio=paqueteServicio;
+        this.paqueteRepositorio=paqueteRepositorio;
     }
     public List<Paquete> ObtenerTodos()
     {
-        return paqueteServicio.ObtenerTodos().ToList();
+        return paqueteRepositorio.ObtenerTodos();
     }
     }

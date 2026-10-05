@@ -1,21 +1,18 @@
 using Persistencia.Entidades;
+using Persistencia.Interfaces;
+using Aplicacion.InterfaceServicio;
 namespace Aplicacion.Servicios;
-
-    public interface IClienteServicio
-    {
-        List<Cliente> ObtenerTodos();
-    }
     public class ClienteServicio:IClienteServicio
     {
-        private readonly IClienteServicio clienteServicio;
+        private readonly IClienteRepositorio clienteRepositorio;
 
-        public ClienteServicio(IClienteServicio servicioCliente)
+        public ClienteServicio(IClienteRepositorio clienteRepositorio)
     {
-        this.clienteServicio=servicioCliente;   
+        this.clienteRepositorio=clienteRepositorio;   
     }
         public List<Cliente> ObtenerTodos()
     {
-         return clienteServicio.ObtenerTodos().ToList();
+         return clienteRepositorio.ObtenerTodos();
     } 
     
 }

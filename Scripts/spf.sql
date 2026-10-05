@@ -1,43 +1,60 @@
-use db_envios;
+USE db_envios;
+
 DROP PROCEDURE IF EXISTS altaEnvioCompleto;
 DROP PROCEDURE IF EXISTS cambiarEstadoEnvio;
 DROP PROCEDURE IF EXISTS cancelarEnvio;
 
 DELIMITER $$
 
--- REGISTRAR UN ENVÍO COMPLETO
+
+
+-- 1. REGISTRAR ENVÍO COMPLETO
 
 
 CREATE PROCEDURE altaEnvioCompleto(
     IN p_idCliente INT,
     IN p_idOrigen INT,
     IN p_idDestino INT,
+
     IN p_peso DECIMAL(10,2),
     IN p_alto DECIMAL(10,2),
     IN p_ancho DECIMAL(10,2),
     IN p_largo DECIMAL(10,2),
+
     IN p_distancia DECIMAL(10,2),
-    IN p_modalidad VARCHAR(20)
+    IN p_idModalidad INT,
+
+    IN p_costo DECIMAL(10,2),
+    IN p_tiempoEstimado INT
 )
 BEGIN
 
     DECLARE v_idPaquete INT;
     DECLARE v_idEnvio INT;
 
+
+    
+    -- MANEJO DE ERRORES
+    
+
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
+        RESIGNAL;
     END;
+
 
     START TRANSACTION;
 
 
-    -- Validar cliente
+    
+    -- VALIDAR CLIENTE
+    
 
     IF NOT EXISTS (
         SELECT 1
         FROM Cliente
-        WHERE idCliente = p_idCliente
+        WHERE IdCliente = p_idCliente
     ) THEN
 
         SIGNAL SQLSTATE '45000'
@@ -46,12 +63,14 @@ BEGIN
     END IF;
 
 
-    -- Validar dirección de origen
+    
+    -- VALIDAR DIRECCION ORIGEN
+    
 
     IF NOT EXISTS (
         SELECT 1
         FROM Direccion
-        WHERE idDireccion = p_idOrigen
+        WHERE IdDireccion = p_idOrigen
     ) THEN
 
         SIGNAL SQLSTATE '45000'
@@ -60,12 +79,14 @@ BEGIN
     END IF;
 
 
-    -- Validar dirección de destino
+    
+    -- VALIDAR DIRECCION DESTINO
+    
 
     IF NOT EXISTS (
         SELECT 1
         FROM Direccion
-        WHERE idDireccion = p_idDestino
+        WHERE IdDireccion = p_idDestino
     ) THEN
 
         SIGNAL SQLSTATE '45000'
@@ -74,7 +95,9 @@ BEGIN
     END IF;
 
 
-    -- Validar paquete
+    
+    -- VALIDAR PAQUETE
+    
 
     IF p_peso <= 0
        OR p_alto <= 0
@@ -83,12 +106,14 @@ BEGIN
 
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT =
-        'Las dimensiones y el peso deben ser mayores que cero';
+        'El peso y las dimensiones deben ser mayores que cero';
 
     END IF;
 
 
-    -- Validar distancia
+    
+    -- VALIDAR DISTANCIA
+    
 
     IF p_distancia <= 0 THEN
 
@@ -99,30 +124,59 @@ BEGIN
     END IF;
 
 
-    -- Validar modalidad
+    
+    -- VALIDAR MODALIDAD
+    
 
-    IF p_modalidad NOT IN
-    (
-        'ESTANDAR',
-        'EXPRESS',
-        'PRIORITARIO'
+    IF NOT EXISTS (
+        SELECT 1
+        FROM Modalidad
+        WHERE IdModalidad = p_idModalidad
     ) THEN
 
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT =
-        'Modalidad de envío inválida';
+        'La modalidad no existe';
 
     END IF;
 
 
-    -- Crear paquete
+    
+    -- VALIDAR COSTO
+    
+
+    IF p_costo < 0 THEN
+
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+        'El costo no puede ser negativo';
+
+    END IF;
+
+
+    
+    -- VALIDAR TIEMPO
+    
+
+    IF p_tiempoEstimado <= 0 THEN
+
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT =
+        'El tiempo estimado debe ser mayor que cero';
+
+    END IF;
+
+
+    
+    -- CREAR PAQUETE
+    
 
     INSERT INTO Paquete
     (
-        peso,
-        alto,
-        ancho,
-        largo
+        Peso,
+        Alto,
+        Ancho,
+        Largo
     )
     VALUES
     (
@@ -136,26 +190,32 @@ BEGIN
     SET v_idPaquete = LAST_INSERT_ID();
 
 
-    -- Crear envío
+    
+    -- CREAR ENVIO
+    
 
     INSERT INTO Envio
     (
-        idCliente,
-        idPaquete,
-        idOrigen,
-        idDestino,
-        distancia,
-        modalidad,
-        estado
+        IdCliente,
+        IdPaquete,
+        IdModalidad,
+        IdDireccionOrigen,
+        IdDireccionDestino,
+        Distancia,
+        Costo,
+        TiempoEstimado,
+        Estado
     )
     VALUES
     (
         p_idCliente,
         v_idPaquete,
+        p_idModalidad,
         p_idOrigen,
         p_idDestino,
         p_distancia,
-        p_modalidad,
+        p_costo,
+        p_tiempoEstimado,
         'PENDIENTE'
     );
 
@@ -163,16 +223,20 @@ BEGIN
     SET v_idEnvio = LAST_INSERT_ID();
 
 
-    -- Registrar estado inicial
+    
+    -- REGISTRAR ESTADO INICIAL
+    
 
     INSERT INTO HistorialEstado
     (
-        idEnvio,
-        estado
+        IdEnvio,
+        EstadoAnterior,
+        EstadoNuevo
     )
     VALUES
     (
         v_idEnvio,
+        NULL,
         'PENDIENTE'
     );
 
@@ -180,39 +244,53 @@ BEGIN
     COMMIT;
 
 
-    SELECT v_idEnvio AS idEnvio;
+    -- DEVOLVER ID DEL ENVIO
+
+    SELECT v_idEnvio AS IdEnvio;
 
 END$$
 
 
 
--- CAMBIAR ESTADO DEL ENVio
+-- 2. CAMBIAR ESTADO DEL ENVIO
+
 
 CREATE PROCEDURE cambiarEstadoEnvio(
     IN p_idEnvio INT,
-    IN p_nuevoEstado VARCHAR(50)
+    IN p_nuevoEstado VARCHAR(45)
 )
 BEGIN
 
-    DECLARE v_estadoActual VARCHAR(50);
+    DECLARE v_estadoActual VARCHAR(45);
+
+
+    
+    -- MANEJO DE ERRORES
+    
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
+        RESIGNAL;
     END;
+
 
     START TRANSACTION;
 
 
-    -- Obtener estado actual
+    
+    -- OBTENER ESTADO ACTUAL
+    
 
-    SELECT estado
+    SELECT Estado
     INTO v_estadoActual
     FROM Envio
-    WHERE idEnvio = p_idEnvio;
+    WHERE IdEnvio = p_idEnvio;
 
 
-    -- Verificar que el envío exista
+    
+    -- VERIFICAR EXISTENCIA
+    
 
     IF v_estadoActual IS NULL THEN
 
@@ -223,7 +301,9 @@ BEGIN
     END IF;
 
 
-    -- Validar nuevo estado
+    
+    -- VALIDAR ESTADO
+    
 
     IF p_nuevoEstado NOT IN
     (
@@ -240,7 +320,9 @@ BEGIN
     END IF;
 
 
-    -- Un envío entregado no puede cambiar
+    
+    -- ENVIO ENTREGADO
+    
 
     IF v_estadoActual = 'ENTREGADO' THEN
 
@@ -251,7 +333,9 @@ BEGIN
     END IF;
 
 
-    -- Un envío cancelado no puede cambiar
+    
+    -- ENVIO CANCELADO
+    
 
     IF v_estadoActual = 'CANCELADO' THEN
 
@@ -262,7 +346,9 @@ BEGIN
     END IF;
 
 
-    -- Validar transición 
+    
+    -- TRANSICION DESDE PENDIENTE
+    
 
     IF v_estadoActual = 'PENDIENTE'
        AND p_nuevoEstado NOT IN
@@ -278,7 +364,9 @@ BEGIN
     END IF;
 
 
-    -- Validar transición 
+    
+    -- TRANSICION DESDE EN_PROCESO
+    
 
     IF v_estadoActual = 'EN_PROCESO'
        AND p_nuevoEstado NOT IN
@@ -294,23 +382,29 @@ BEGIN
     END IF;
 
 
-    -- Actualizar estado
+    
+    -- ACTUALIZAR ENVIO
+    
 
     UPDATE Envio
-    SET estado = p_nuevoEstado
-    WHERE idEnvio = p_idEnvio;
+    SET Estado = p_nuevoEstado
+    WHERE IdEnvio = p_idEnvio;
 
 
-    -- Registrar en historial
+    
+    -- GUARDAR HISTORIAL
+    
 
     INSERT INTO HistorialEstado
     (
-        idEnvio,
-        estado
+        IdEnvio,
+        EstadoAnterior,
+        EstadoNuevo
     )
     VALUES
     (
         p_idEnvio,
+        v_estadoActual,
         p_nuevoEstado
     );
 
@@ -319,32 +413,46 @@ BEGIN
 
 END$$
 
--- CANCELAR ENVÍO
+
+
+-- 3. CANCELAR ENVIO
+
 
 CREATE PROCEDURE cancelarEnvio(
     IN p_idEnvio INT
 )
 BEGIN
 
-    DECLARE v_estadoActual VARCHAR(50);
+    DECLARE v_estadoActual VARCHAR(45);
+
+
+    
+    -- MANEJO DE ERRORES
+    
 
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
+        RESIGNAL;
     END;
+
 
     START TRANSACTION;
 
 
     
+    -- OBTENER ESTADO ACTUAL
+    
 
-    SELECT estado
+    SELECT Estado
     INTO v_estadoActual
     FROM Envio
-    WHERE idEnvio = p_idEnvio;
+    WHERE IdEnvio = p_idEnvio;
 
 
-   
+    
+    -- VERIFICAR EXISTENCIA
+    
 
     IF v_estadoActual IS NULL THEN
 
@@ -355,7 +463,9 @@ BEGIN
     END IF;
 
 
-   
+    
+    -- VERIFICAR SI YA FUE ENTREGADO
+    
 
     IF v_estadoActual = 'ENTREGADO' THEN
 
@@ -366,6 +476,9 @@ BEGIN
     END IF;
 
 
+    
+    -- VERIFICAR SI YA ESTA CANCELADO
+    
 
     IF v_estadoActual = 'CANCELADO' THEN
 
@@ -376,23 +489,29 @@ BEGIN
     END IF;
 
 
-    -- Cambiar estado
+    
+    -- CAMBIAR ESTADO
+    
 
     UPDATE Envio
-    SET estado = 'CANCELADO'
-    WHERE idEnvio = p_idEnvio;
+    SET Estado = 'CANCELADO'
+    WHERE IdEnvio = p_idEnvio;
 
 
- 
+    
+    -- REGISTRAR HISTORIAL
+    
 
     INSERT INTO HistorialEstado
     (
-        idEnvio,
-        estado
+        IdEnvio,
+        EstadoAnterior,
+        EstadoNuevo
     )
     VALUES
     (
         p_idEnvio,
+        v_estadoActual,
         'CANCELADO'
     );
 

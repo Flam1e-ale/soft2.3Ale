@@ -1,23 +1,20 @@
 using Persistencia.Entidades;
+using Persistencia.Interfaces;
+using Aplicacion.InterfaceServicio;
 namespace Aplicacion.Servicios;
 
-    public interface IDireccionServicio
-    {
-        List<Direccion> ObtenerTodos();
-    }
-
-    public class DireccionServicio:IDireccionServicio
-    {
-        private readonly IDireccionServicio direccionServicio;
+        public class DireccionServicio:IDireccionServicio
+        {
+            private readonly IDireccionRepositorio direccionRepositorio;
 
 
-    public DireccionServicio(DireccionServicio direccionServicio)
+        public DireccionServicio(IDireccionRepositorio direccionRepositorio)
 
-    {
-        this.direccionServicio=direccionServicio;
-    }
-    public List<Direccion> ObtenerTodos()
-    {
-        return direccionServicio.ObtenerTodos().ToList();
-    }
-    }
+        {
+            this.direccionRepositorio=direccionRepositorio;
+        }
+        public List<Direccion> ObtenerTodos()
+        {
+            return direccionRepositorio.ObtenerTodos();
+        }
+        }

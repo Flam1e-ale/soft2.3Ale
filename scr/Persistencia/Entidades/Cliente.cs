@@ -2,16 +2,16 @@ namespace Persistencia.Entidades;
 
     public class Cliente
     {
-    public int Id { get; set; }
+    public int IdCliente { get; set; }
     private string nombre = null!;  
     public string Nombre
     {
         get => nombre;
         set
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentNullException("nombre invalido");
+                throw new ArgumentException("nombre invalido");
             }
             nombre = value;
         }
@@ -23,9 +23,9 @@ namespace Persistencia.Entidades;
         get => email;
         set
         {
-          if (string.IsNullOrEmpty(value))
+          if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentNullException("email invalido");
+                throw new ArgumentException("email invalido");
             }
              email = value;
         }

@@ -1,7 +1,7 @@
 namespace Persistencia.Entidades;
     public class Direccion
     {
-    public int Id { get; set; }
+    public int IdDireccion { get; set; }
 
     private string calle =null!;
      public string Calle 
@@ -9,9 +9,9 @@ namespace Persistencia.Entidades;
         get => calle;
         set
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentNullException("email invalido");
+                throw new ArgumentNullException("Calle invalida");
             }
              calle = value;
         }
@@ -27,7 +27,7 @@ namespace Persistencia.Entidades;
         }
         set
         {
-           if (value < 0 || value > 5000)
+           if (value <= 0 || value > 5000)
             {
                 throw new ArgumentOutOfRangeException("direccion invalida");
             }
@@ -42,7 +42,7 @@ private string ciudad=null!;
         get => ciudad;
         set
         {
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
                 throw new ArgumentNullException("ciudad invalida");
             }

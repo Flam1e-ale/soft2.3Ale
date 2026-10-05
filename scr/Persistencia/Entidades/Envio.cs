@@ -19,6 +19,8 @@ namespace Persistencia.Entidades;
         Direccion destino,
         double distancia)
     {
+        if (distancia <= 0)
+            throw new ArgumentOutOfRangeException("Distancia inválida");
         Cliente = cliente;
         Paquete = paquete;
         Origen = origen;
