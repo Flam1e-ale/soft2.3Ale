@@ -11,7 +11,7 @@ namespace Persistencia.Entidades;
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentNullException("Calle invalida");
+                throw new ArgumentException("Calle invalida");
             }
              calle = value;
         }
@@ -53,6 +53,12 @@ private string ciudad=null!;
 
     public Direccion(string calle, int numero, string ciudad)
     {
+        if (string.IsNullOrWhiteSpace(calle))
+        throw new ArgumentException("La calle no puede estar vacía.");
+
+        if (string.IsNullOrWhiteSpace(ciudad))
+        throw new ArgumentException("Ciudad invalida.");
+
         Calle = calle;
         Numero = numero;
         Ciudad = ciudad;

@@ -38,13 +38,13 @@ public class EnvioServicio : IEnvioServicio
         if (idModalidad < 1 || idModalidad > 3)
             throw new ArgumentException("Modalidad inválida");
 
-        // Creamos un paquete temporal solo para calcular
+        
         var paqueteTemp = new Paquete(peso, alto, ancho, largo);
         var clienteTemp = new Cliente("temp", "temp@temp.com");
         var origenTemp = new Direccion("temp", 1, "temp");
         var destinoTemp = new Direccion("temp", 1, "temp");
 
-        // Polimorfismo puro: sin if/switch por tipo
+        
         Envio envio = idModalidad switch
         {
             EnvioEstandar.IdModalidad => new EnvioEstandar(0, clienteTemp, paqueteTemp, origenTemp, destinoTemp, distancia),
@@ -55,6 +55,7 @@ public class EnvioServicio : IEnvioServicio
 
         double costo = envio.CalcularCosto();
         int tiempo = envio.CalcularTiempoEntrega();
+           
 
         // Persistimos con el SP
         _envioRepositorio.AltaEnvioCompleto(

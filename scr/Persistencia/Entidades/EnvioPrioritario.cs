@@ -20,10 +20,10 @@ namespace Persistencia.Entidades;
     }
     public override double CalcularCosto()
     {
-        return 3500 + (Paquete.Peso * 200) + (Distancia * 20);
+        return Costo= 3500 + (Paquete.Peso * 200) + (Distancia * 20);
     }
     public override int CalcularTiempoEntrega()
     {
-        return 1;
+        return TiempoEstimado= 1;
     }
     }
