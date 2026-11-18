@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "scr\Tests\Test.cspr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persistencia", "scr\Persistencia\Persistencia.csproj", "{2CA4CDAF-5735-4054-98D5-111AACE8158B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{803E9FEB-B5C2-4B22-92D4-3842447AD8D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "scr\API\API.csproj", "{803E9FEB-B5C2-4B22-92D4-3842447AD8D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
