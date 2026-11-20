@@ -125,30 +125,36 @@ public class EnvioRepositorio : IEnvioRepositorio
         return envio;
     }
 
-    // ========== STORED PROCEDURES ==========
+   
     public int AltaEnvioCompleto(
-        int idCliente, int idOrigen, int idDestino,
-        double peso, double alto, double ancho, double largo,
-        double distancia, int idModalidad, double costo, int tiempoEstimado)
-    {
-        using var connection = _connectionFactory.CrearConexion();
+    int idCliente, int idOrigen, int idDestino,
+    double peso, double alto, double ancho, double largo,
+    double distancia, int idModalidad, double costo, int tiempoEstimado)
+{
+    using var connection = _connectionFactory.CrearConexionAdmin();
 
-        var parametros = new DynamicParameters();
-        parametros.Add("p_idCliente", idCliente);
-        parametros.Add("p_idOrigen", idOrigen);
-        parametros.Add("p_idDestino", idDestino);
-        parametros.Add("p_peso", peso);
-        parametros.Add("p_alto", alto);
-        parametros.Add("p_ancho", ancho);
-        parametros.Add("p_largo", largo);
-        parametros.Add("p_distancia", distancia);
-        parametros.Add("p_idModalidad", idModalidad);
-        parametros.Add("p_costo", costo);
-        parametros.Add("p_tiempoEstimado", tiempoEstimado);
+    var parametros = new DynamicParameters();
+    parametros.Add("p_idCliente", idCliente);
+    parametros.Add("p_idOrigen", idOrigen);
+    parametros.Add("p_idDestino", idDestino);
+    parametros.Add("p_peso", peso);
+    parametros.Add("p_alto", alto);
+    parametros.Add("p_ancho", ancho);
+    parametros.Add("p_largo", largo);
+    parametros.Add("p_distancia", distancia);
+    parametros.Add("p_idModalidad", idModalidad);
+    parametros.Add("p_costo", costo);
+    parametros.Add("p_tiempoEstimado", tiempoEstimado);
 
-        connection.Execute("altaEnvioCompleto", parametros, commandType: CommandType.StoredProcedure);
-        return 1; // el SP no devuelve el ID
-    }
+    connection.Execute(
+        "altaEnvioCompleto",
+        parametros,
+        commandType: CommandType.StoredProcedure);
+         return connection.QuerySingle<int>(@"
+        SELECT IdEnvio
+        FROM HistorialEstado
+        WHERE IdHistorial = LAST_INSERT_ID();");
+}
 
     public void CambiarEstado(int idEnvio, string nuevoEstado)
     {
@@ -165,7 +171,137 @@ public class EnvioRepositorio : IEnvioRepositorio
             new { p_idEnvio = idEnvio },
             commandType: CommandType.StoredProcedure);
     }
+    public bool ActualizarEnvioCompleto(
+    int idEnvio,
+    int idCliente,
+    int idOrigen,
+    int idDestino,
+    double peso,
+    double alto,
+    double ancho,
+    double largo,
+    double distancia,
+    int idModalidad,
+    double costo,
+    int tiempoEstimado)
+{
+    using var connection = _connectionFactory.CrearConexionAdmin();
+    using var transaction = connection.BeginTransaction();
 
+    try
+    {
+        var idPaquete = connection.QuerySingleOrDefault<int?>(
+            @"SELECT IdPaquete
+              FROM Envio
+              WHERE IdEnvio = @idEnvio
+              FOR UPDATE",
+            new { idEnvio },
+            transaction);
+
+        if (idPaquete == null)
+            return false;
+
+        connection.Execute(@"
+            UPDATE Paquete
+            SET Peso = @peso,
+                Alto = @alto,
+                Ancho = @ancho,
+                Largo = @largo
+            WHERE IdPaquete = @idPaquete",
+            new
+            {
+                peso,
+                alto,
+                ancho,
+                largo,
+                idPaquete
+            },
+            transaction);
+
+        connection.Execute(@"
+            UPDATE Envio
+            SET IdCliente = @idCliente,
+                IdDireccionOrigen = @idOrigen,
+                IdDireccionDestino = @idDestino,
+                IdModalidad = @idModalidad,
+                Distancia = @distancia,
+                Costo = @costo,
+                TiempoEstimado = @tiempoEstimado
+            WHERE IdEnvio = @idEnvio",
+            new
+            {
+                idCliente,
+                idOrigen,
+                idDestino,
+                idModalidad,
+                distancia,
+                costo,
+                tiempoEstimado,
+                idEnvio
+            },
+            transaction);
+
+        transaction.Commit();
+
+        return true;
+    }
+    catch
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
+public bool Eliminar(int idEnvio)
+{
+    using var connection = _connectionFactory.CrearConexionAdmin();
+    using var transaction = connection.BeginTransaction();
+
+    try
+    {
+        var idPaquete = connection.QuerySingleOrDefault<int?>(
+            @"SELECT IdPaquete
+              FROM Envio
+              WHERE IdEnvio = @idEnvio
+              FOR UPDATE",
+            new { idEnvio },
+            transaction);
+
+        if (idPaquete == null)
+            return false;
+
+        // El historial no tiene ON DELETE CASCADE.
+        connection.Execute(
+            "DELETE FROM HistorialEstado WHERE IdEnvio = @idEnvio",
+            new { idEnvio },
+            transaction);
+
+        connection.Execute(
+            "DELETE FROM Envio WHERE IdEnvio = @idEnvio",
+            new { idEnvio },
+            transaction);
+
+        // Solo eliminamos el paquete si ningún otro envío lo utiliza.
+        connection.Execute(@"
+            DELETE FROM Paquete
+            WHERE IdPaquete = @idPaquete
+            AND NOT EXISTS (
+                SELECT 1
+                FROM Envio
+                WHERE IdPaquete = @idPaquete
+            )",
+            new { idPaquete },
+            transaction);
+
+        transaction.Commit();
+
+        return true;
+    }
+    catch
+    {
+        transaction.Rollback();
+        throw;
+    }
+}
     // ========== ESTADÍSTICAS ==========
     public IEnumerable<dynamic> ObtenerResumenEnvios(DateTime fechaInicio, DateTime fechaFin)
     {

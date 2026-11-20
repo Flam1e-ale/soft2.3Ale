@@ -2,6 +2,7 @@
   <Folder Name="/Tests/">
     <Project Path="Tests/Test.csproj" />
   </Folder>
+  <Project Path="API/API.csproj" />
   <Project Path="Aplicacion/Aplicacion.csproj" />
   <Project Path="Persistencia/Persistencia.csproj" />
 </Solution>

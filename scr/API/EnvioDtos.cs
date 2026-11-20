@@ -1,24 +1,38 @@
+using Persistencia.Entidades;
+
+namespace API;
+
 public class EnvioRequestDto
 {
-    public string Modalidad { get; set; } = string.Empty;
-    public decimal PesoKg { get; set; }
-    public decimal DistanciaKm { get; set; }
-    public string Destino { get; set; } = string.Empty;
+    public Cliente Cliente { get; set; } = new();
+    public Paquete Paquete { get; set; } = new();
+    public Direccion Origen { get; set; } = new();
+    public Direccion Destino { get; set; } = new();
+
+    public int IdModalidad { get; set; }
+    public double Distancia { get; set; }
 }
 
-
-public class EnvioResponseDto : EnvioRequestDto
+public class EnvioResponseDto
 {
     public int Id { get; set; }
+    public int IdModalidad { get; set; }
+
+    public Cliente Cliente { get; set; } = new();
+    public Paquete Paquete { get; set; } = new();
+    public Direccion Origen { get; set; } = new();
+    public Direccion Destino { get; set; } = new();
+
+    public double Distancia { get; set; }
     public string Estado { get; set; } = string.Empty;
-    public decimal Costo { get; set; }
+    public double Costo { get; set; }
     public int DiasEstimados { get; set; }
 }
 
 public class CotizacionDto
 {
     public int Id { get; set; }
-    public decimal Costo { get; set; }
+    public double Costo { get; set; }
     public int DiasEstimados { get; set; }
 }
 

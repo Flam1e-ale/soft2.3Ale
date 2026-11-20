@@ -58,12 +58,23 @@ public class EnvioServicio : IEnvioServicio
            
 
         // Persistimos con el SP
-        _envioRepositorio.AltaEnvioCompleto(
-            idCliente, idOrigen, idDestino,
-            peso, alto, ancho, largo,
-            distancia, idModalidad, costo, tiempo);
+        int idEnvio = _envioRepositorio.AltaEnvioCompleto(
+    idCliente,
+    idOrigen,
+    idDestino,
+    peso,
+    alto,
+    ancho,
+    largo,
+    distancia,
+    idModalidad,
+    costo,
+    tiempo);
 
-        return envio;
+// Recuperamos el envío real desde MySQL.
+return _envioRepositorio.ObtenerPorId(idEnvio)
+    ?? throw new InvalidOperationException(
+        "No se pudo recuperar el envío registrado.");
     }
 
     public void CambiarEstado(int idEnvio, string nuevoEstado)

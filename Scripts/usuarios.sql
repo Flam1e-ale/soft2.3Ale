@@ -1,7 +1,6 @@
--- 
--- USUARIOS DEL SISTEMA
--- 
-
+-- root localhost skibidisigma esto es clave
+-- USUARIOS DEL SISTEMA                                            Invitado
+-- en caso de emergencia dotnet user-secrets set "ConnectionStrings:Admin" "Server=localhost;Port=3306;Database=db_envios;User ID=root;Password=skibidisigma;"
 -- Crear usuario administrador
 CREATE USER IF NOT EXISTS 'administrador'@'localhost'IDENTIFIED BY 'Admin_Envios_2026';
 
