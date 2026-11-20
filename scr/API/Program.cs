@@ -1,37 +1,29 @@
 using System.Data;
 using MySqlConnector;
+using Aplicacion.Servicios;
+using Persistencia.Conexion;
+using Persistencia.Interfaces;
+using Persistencia.Repositorios;
+using Aplicacion.InterfaceServicio;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-//builder.Services.AddOpenApi();
+builder.Services.AddOpenApi();
 
-var connectionString = builder.Configuration.GetConnectionString("MySql");
-if (string.IsNullOrWhiteSpace(connectionString))
-{
-    throw new InvalidOperationException(
-        "Debe configurar ConnectionStrings:MySql en appsettings.json o la variable de entorno ConnectionStrings__MySql.");
-}
-builder.Services.AddScoped<IDbConnection>(_ => new MySqlConnection(connectionString));
+builder.Services.AddSingleton<IDbConnectionFactory, MySQLConnectionFactory>();
+builder.Services.AddScoped<IEnvioRepositorio, EnvioRepositorio>();
+builder.Services.AddScoped<IEnvioServicio, EnvioServicio>();
+
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "API de Envíos v1");
-        options.EnableTryItOutByDefault();
-    });
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/openapi/v1.json", "API Envíos v1"));
 }
 
-app.UseHttpsRedirection();
-
-app.MapGet("/bienvenida", () => Results.Ok("API de Envíos – SOFTWARE 2.4"));
-
-
 app.MapEnvioEndpoints();
-
 app.Run();
