@@ -20,7 +20,8 @@ CREATE PROCEDURE altaEnvioCompleto(
     IN p_distancia DECIMAL(10,2),
     IN p_idModalidad INT,
     IN p_costo DECIMAL(10,2),
-    IN p_tiempoEstimado INT
+    IN p_tiempoEstimado INT,
+    OUT p_idEnvio INT
 )
 BEGIN
 
@@ -205,7 +206,7 @@ BEGIN
 
     SET v_idEnvio = LAST_INSERT_ID();
 
-
+    SET p_idEnvio = v_idEnvio;
     -- 
     -- CREAR HISTORIAL INICIAL
     -- 

@@ -1,6 +1,7 @@
 using Aplicacion.InterfaceServicio;
 using Persistencia.Entidades;
 using Persistencia.Interfaces;
+using MySqlConnector;
 
 namespace API;
 
@@ -78,57 +79,80 @@ public class EnvioApiServicio : IEnvioApiServicio
         };
     }
 
-    public EnvioResponseDto? Actualizar(
-        int id,
-        EnvioRequestDto solicitud)
-    {
-        var existente = _envioServicio.ObtenerPorId(id);
+   
+public EnvioResponseDto? Actualizar(
+    int id,
+    EnvioRequestDto solicitud)
+{
+    var existente = _envioServicio.ObtenerPorId(id);
 
-        if (existente == null)
-            return null;
+    if (existente == null)
+        return null;
 
-        ValidarSolicitud(solicitud);
+    ValidarSolicitud(solicitud);
 
-        int idCliente = _clienteServicio.Crear(solicitud.Cliente);
-        int idOrigen = _direccionServicio.Crear(solicitud.Origen);
-        int idDestino = _direccionServicio.Crear(solicitud.Destino);
+    // Conservamos los IDs de los registros asociados al envío.
+    int idCliente = existente.Cliente.IdCliente;
+    int idOrigen = existente.Origen.IdDireccion;
+    int idDestino = existente.Destino.IdDireccion;
 
-        var nuevoEnvio = ConstruirEnvio(
-            id,
-            solicitud,
-            idCliente,
-            idOrigen,
-            idDestino);
+    // Actualizamos el cliente existente.
+    solicitud.Cliente.IdCliente = idCliente;
+    _clienteServicio.Actualizar(solicitud.Cliente);
 
-        double costo = nuevoEnvio.CalcularCosto();
-        int tiempo = nuevoEnvio.CalcularTiempoEntrega();
+    // Actualizamos las direcciones existentes.
+    solicitud.Origen.IdDireccion = idOrigen;
+    _direccionServicio.Actualizar(solicitud.Origen);
 
-        bool actualizado = _envioRepositorio.ActualizarEnvioCompleto(
-            id,
-            idCliente,
-            idOrigen,
-            idDestino,
-            solicitud.Paquete.Peso,
-            solicitud.Paquete.Alto,
-            solicitud.Paquete.Ancho,
-            solicitud.Paquete.Largo,
-            solicitud.Distancia,
-            solicitud.IdModalidad,
-            costo,
-            tiempo);
+    solicitud.Destino.IdDireccion = idDestino;
+    _direccionServicio.Actualizar(solicitud.Destino);
 
-        if (!actualizado)
-            return null;
+    var nuevoEnvio = ConstruirEnvio(
+        id,
+        solicitud,
+        idCliente,
+        idOrigen,
+        idDestino);
 
-        var resultado = _envioServicio.ObtenerPorId(id);
+    double costo = nuevoEnvio.CalcularCosto();
+    int tiempo = nuevoEnvio.CalcularTiempoEntrega();
 
-        return resultado == null ? null : Convertir(resultado);
-    }
+    bool actualizado = _envioRepositorio.ActualizarEnvioCompleto(
+        id,
+        idCliente,
+        idOrigen,
+        idDestino,
+        solicitud.Paquete.Peso,
+        solicitud.Paquete.Alto,
+        solicitud.Paquete.Ancho,
+        solicitud.Paquete.Largo,
+        solicitud.Distancia,
+        solicitud.IdModalidad,
+        costo,
+        tiempo);
+
+    if (!actualizado)
+        return null;
+
+    var resultado = _envioServicio.ObtenerPorId(id);
+
+    return resultado == null ? null : Convertir(resultado);
+}
+
 
     public bool Eliminar(int id)
     {
         return _envioRepositorio.Eliminar(id);
     }
+    public bool Cancelar(int id)
+{
+    if (_envioServicio.ObtenerPorId(id) == null)
+        return false;
+
+    _envioRepositorio.CancelarEnvio(id);
+
+    return true;
+}
 
     public bool CambiarEstado(int id, string nuevoEstado)
     {

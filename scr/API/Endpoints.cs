@@ -2,6 +2,7 @@ using API;
 using Aplicacion.InterfaceServicio;
 using Microsoft.AspNetCore.Mvc;
 using Persistencia.Entidades;
+using MySqlConnector;
 public static class EnvioEndpoints
 {
     public static void MapEnvioEndpoints(this IEndpointRouteBuilder app)
@@ -85,6 +86,21 @@ public static class EnvioEndpoints
                 return Results.BadRequest(new { error = ex.Message });
             }
         });
+        app.MapPatch("/api/envios/{id:int}/cancelar", (int id,
+    [FromServices] IEnvioApiServicio servicio) =>
+{
+    try
+    {
+        bool cancelado = servicio.Cancelar(id);
 
+        return cancelado
+            ? Results.Ok(new { mensaje = "Envío cancelado correctamente." })
+            : Results.NotFound(new { error = "No se encontró el envío." });
+    }
+    catch (MySqlException ex)
+    {
+        return Results.BadRequest(new { error = ex.Message });
+    }
+});
 }   
 }

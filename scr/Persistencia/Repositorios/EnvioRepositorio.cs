@@ -39,10 +39,12 @@ public class EnvioRepositorio : IEnvioRepositorio
                 p.Ancho,
                 p.Largo,
 
+                do.IdDireccion AS IdDireccionOrigen,
                 do.Calle AS CalleOrigen,
                 do.Numero AS NumeroOrigen,
                 do.Ciudad AS CiudadOrigen,
 
+                dd.IdDireccion AS IdDireccionDestino,
                 dd.Calle AS CalleDestino,
                 dd.Numero AS NumeroDestino,
                 dd.Ciudad AS CiudadDestino
@@ -55,7 +57,11 @@ public class EnvioRepositorio : IEnvioRepositorio
             WHERE e.IdEnvio = @IdEnvio;
         ";
 
-        var datos = connection.QueryFirstOrDefault<EnvioDatos>(sql, new { IdEnvio = idEnvio });
+        var datos = connection.QueryFirstOrDefault<EnvioDatos>(
+            sql,
+            new { IdEnvio = idEnvio }
+        );
+
         return datos == null ? null : CrearEnvio(datos);
     }
 
@@ -83,10 +89,12 @@ public class EnvioRepositorio : IEnvioRepositorio
                 p.Ancho,
                 p.Largo,
 
+                do.IdDireccion AS IdDireccionOrigen,
                 do.Calle AS CalleOrigen,
                 do.Numero AS NumeroOrigen,
                 do.Ciudad AS CiudadOrigen,
 
+                dd.IdDireccion AS IdDireccionDestino,
                 dd.Calle AS CalleDestino,
                 dd.Numero AS NumeroDestino,
                 dd.Ciudad AS CiudadDestino
@@ -99,79 +107,155 @@ public class EnvioRepositorio : IEnvioRepositorio
         ";
 
         var lista = connection.Query<EnvioDatos>(sql).ToList();
+
         return lista.Select(CrearEnvio).ToList();
     }
 
     // ========== FACTORY POLIMÓRFICO ==========
+
     private Envio CrearEnvio(EnvioDatos d)
     {
-        var cliente = new Cliente(d.Nombre, d.Email) { IdCliente = d.IdCliente };
-        var paquete = new Paquete(d.Peso, d.Alto, d.Ancho, d.Largo) { IdPaquete = d.IdPaquete };
-        var origen = new Direccion(d.CalleOrigen, d.NumeroOrigen, d.CiudadOrigen);
-        var destino = new Direccion(d.CalleDestino, d.NumeroDestino, d.CiudadDestino);
+        var cliente = new Cliente(d.Nombre, d.Email)
+        {
+            IdCliente = d.IdCliente
+        };
+
+        var paquete = new Paquete(
+            d.Peso,
+            d.Alto,
+            d.Ancho,
+            d.Largo)
+        {
+            IdPaquete = d.IdPaquete
+        };
+
+        var origen = new Direccion(
+            d.CalleOrigen,
+            d.NumeroOrigen,
+            d.CiudadOrigen)
+        {
+            IdDireccion = d.IdDireccionOrigen
+        };
+
+        var destino = new Direccion(
+            d.CalleDestino,
+            d.NumeroDestino,
+            d.CiudadDestino)
+        {
+            IdDireccion = d.IdDireccionDestino
+        };
 
         Envio envio = d.IdModalidad switch
         {
-            EnvioEstandar.IdModalidad => new EnvioEstandar(d.IdEnvio, cliente, paquete, origen, destino, d.Distancia),
-            EnvioExpress.IdModalidad => new EnvioExpress(d.IdEnvio, cliente, paquete, origen, destino, d.Distancia),
-            EnvioPrioritario.IdModalidad => new EnvioPrioritario(d.IdEnvio, cliente, paquete, origen, destino, d.Distancia),
-            _ => throw new InvalidOperationException($"Modalidad desconocida: {d.IdModalidad}")
+            EnvioEstandar.IdModalidad =>
+                new EnvioEstandar(
+                    d.IdEnvio,
+                    cliente,
+                    paquete,
+                    origen,
+                    destino,
+                    d.Distancia),
+
+            EnvioExpress.IdModalidad =>
+                new EnvioExpress(
+                    d.IdEnvio,
+                    cliente,
+                    paquete,
+                    origen,
+                    destino,
+                    d.Distancia),
+
+            EnvioPrioritario.IdModalidad =>
+                new EnvioPrioritario(
+                    d.IdEnvio,
+                    cliente,
+                    paquete,
+                    origen,
+                    destino,
+                    d.Distancia),
+
+            _ => throw new InvalidOperationException(
+                $"Modalidad desconocida: {d.IdModalidad}")
         };
 
-        // Asigne los valores ya calculados y persistidos
-        
+        // Asignamos el estado persistido en la base de datos.
         envio.Estado = d.Estado;
 
         return envio;
     }
 
-   
     public int AltaEnvioCompleto(
-    int idCliente, int idOrigen, int idDestino,
-    double peso, double alto, double ancho, double largo,
-    double distancia, int idModalidad, double costo, int tiempoEstimado)
-{
-    using var connection = _connectionFactory.CrearConexionAdmin();
+        int idCliente,
+        int idOrigen,
+        int idDestino,
+        double peso,
+        double alto,
+        double ancho,
+        double largo,
+        double distancia,
+        int idModalidad,
+        double costo,
+        int tiempoEstimado)
+    {
+        using var connection = _connectionFactory.CrearConexionAdmin();
 
-    var parametros = new DynamicParameters();
-    parametros.Add("p_idCliente", idCliente);
-    parametros.Add("p_idOrigen", idOrigen);
-    parametros.Add("p_idDestino", idDestino);
-    parametros.Add("p_peso", peso);
-    parametros.Add("p_alto", alto);
-    parametros.Add("p_ancho", ancho);
-    parametros.Add("p_largo", largo);
-    parametros.Add("p_distancia", distancia);
-    parametros.Add("p_idModalidad", idModalidad);
-    parametros.Add("p_costo", costo);
-    parametros.Add("p_tiempoEstimado", tiempoEstimado);
+        var parametros = new DynamicParameters();
 
-    connection.Execute(
-        "altaEnvioCompleto",
-        parametros,
-        commandType: CommandType.StoredProcedure);
-         return connection.QuerySingle<int>(@"
-        SELECT IdEnvio
-        FROM HistorialEstado
-        WHERE IdHistorial = LAST_INSERT_ID();");
-}
+        parametros.Add("p_idCliente", idCliente);
+        parametros.Add("p_idOrigen", idOrigen);
+        parametros.Add("p_idDestino", idDestino);
+        parametros.Add("p_peso", peso);
+        parametros.Add("p_alto", alto);
+        parametros.Add("p_ancho", ancho);
+        parametros.Add("p_largo", largo);
+        parametros.Add("p_distancia", distancia);
+        parametros.Add("p_idModalidad", idModalidad);
+        parametros.Add("p_costo", costo);
+        parametros.Add("p_tiempoEstimado", tiempoEstimado);
+
+        parametros.Add(
+            "p_idEnvio",
+            dbType: DbType.Int32,
+            direction: ParameterDirection.Output
+        );
+
+        connection.Execute(
+            "altaEnvioCompleto",
+            parametros,
+            commandType: CommandType.StoredProcedure
+        );
+
+        return parametros.Get<int>("p_idEnvio");
+    }
 
     public void CambiarEstado(int idEnvio, string nuevoEstado)
     {
         using var connection = _connectionFactory.CrearConexion();
-        connection.Execute("cambiarEstadoEnvio",
-            new { p_idEnvio = idEnvio, p_nuevoEstado = nuevoEstado },
-            commandType: CommandType.StoredProcedure);
+
+        connection.Execute(
+            "cambiarEstadoEnvio",
+            new
+            {
+                p_idEnvio = idEnvio,
+                p_nuevoEstado = nuevoEstado
+            },
+            commandType: CommandType.StoredProcedure
+        );
     }
 
     public void CancelarEnvio(int idEnvio)
     {
         using var connection = _connectionFactory.CrearConexion();
-        connection.Execute("cancelarEnvio",
+
+        connection.Execute(
+            "cancelarEnvio",
             new { p_idEnvio = idEnvio },
-            commandType: CommandType.StoredProcedure);
+            commandType: CommandType.StoredProcedure
+        );
     }
-    public bool ActualizarEnvioCompleto(
+
+   
+public bool ActualizarEnvioCompleto(
     int idEnvio,
     int idCliente,
     int idOrigen,
@@ -186,6 +270,10 @@ public class EnvioRepositorio : IEnvioRepositorio
     int tiempoEstimado)
 {
     using var connection = _connectionFactory.CrearConexionAdmin();
+
+    // CORRECCIÓN: abrir la conexión antes de iniciar la transacción.
+    connection.Open();
+
     using var transaction = connection.BeginTransaction();
 
     try
@@ -196,7 +284,8 @@ public class EnvioRepositorio : IEnvioRepositorio
               WHERE IdEnvio = @idEnvio
               FOR UPDATE",
             new { idEnvio },
-            transaction);
+            transaction
+        );
 
         if (idPaquete == null)
             return false;
@@ -216,7 +305,8 @@ public class EnvioRepositorio : IEnvioRepositorio
                 largo,
                 idPaquete
             },
-            transaction);
+            transaction
+        );
 
         connection.Execute(@"
             UPDATE Envio
@@ -239,7 +329,8 @@ public class EnvioRepositorio : IEnvioRepositorio
                 tiempoEstimado,
                 idEnvio
             },
-            transaction);
+            transaction
+        );
 
         transaction.Commit();
 
@@ -251,9 +342,16 @@ public class EnvioRepositorio : IEnvioRepositorio
         throw;
     }
 }
+
+
+
 public bool Eliminar(int idEnvio)
 {
     using var connection = _connectionFactory.CrearConexionAdmin();
+
+    // Abrimos la conexión antes de iniciar la transacción.
+    connection.Open();
+
     using var transaction = connection.BeginTransaction();
 
     try
@@ -264,23 +362,31 @@ public bool Eliminar(int idEnvio)
               WHERE IdEnvio = @idEnvio
               FOR UPDATE",
             new { idEnvio },
-            transaction);
+            transaction
+        );
 
         if (idPaquete == null)
+        {
+            transaction.Rollback();
             return false;
+        }
 
-        // El historial no tiene ON DELETE CASCADE.
+        // Eliminamos primero el historial.
         connection.Execute(
             "DELETE FROM HistorialEstado WHERE IdEnvio = @idEnvio",
             new { idEnvio },
-            transaction);
+            transaction
+        );
 
+        // Eliminamos el envío.
         connection.Execute(
             "DELETE FROM Envio WHERE IdEnvio = @idEnvio",
             new { idEnvio },
-            transaction);
+            transaction
+        );
 
-        // Solo eliminamos el paquete si ningún otro envío lo utiliza.
+        // Eliminamos el paquete solamente si no está asociado
+        // a ningún otro envío.
         connection.Execute(@"
             DELETE FROM Paquete
             WHERE IdPaquete = @idPaquete
@@ -290,7 +396,8 @@ public bool Eliminar(int idEnvio)
                 WHERE IdPaquete = @idPaquete
             )",
             new { idPaquete },
-            transaction);
+            transaction
+        );
 
         transaction.Commit();
 
@@ -302,44 +409,92 @@ public bool Eliminar(int idEnvio)
         throw;
     }
 }
+
+
     // ========== ESTADÍSTICAS ==========
-    public IEnumerable<dynamic> ObtenerResumenEnvios(DateTime fechaInicio, DateTime fechaFin)
+
+    public IEnumerable<dynamic> ObtenerResumenEnvios(
+        DateTime fechaInicio,
+        DateTime fechaFin)
     {
         using var connection = _connectionFactory.CrearConexion();
-        return connection.Query("obtenerResumenEnvios",
-            new { p_fechaInicio = fechaInicio, p_fechaFin = fechaFin },
-            commandType: CommandType.StoredProcedure);
+
+        return connection.Query(
+            "obtenerResumenEnvios",
+            new
+            {
+                p_fechaInicio = fechaInicio,
+                p_fechaFin = fechaFin
+            },
+            commandType: CommandType.StoredProcedure
+        );
     }
 
-    public IEnumerable<dynamic> ObtenerCostosPorModalidad(DateTime fechaInicio, DateTime fechaFin)
+    public IEnumerable<dynamic> ObtenerCostosPorModalidad(
+        DateTime fechaInicio,
+        DateTime fechaFin)
     {
         using var connection = _connectionFactory.CrearConexion();
-        return connection.Query("obtenerCostosPorModalidad",
-            new { p_fechaInicio = fechaInicio, p_fechaFin = fechaFin },
-            commandType: CommandType.StoredProcedure);
+
+        return connection.Query(
+            "obtenerCostosPorModalidad",
+            new
+            {
+                p_fechaInicio = fechaInicio,
+                p_fechaFin = fechaFin
+            },
+            commandType: CommandType.StoredProcedure
+        );
     }
 
-    public IEnumerable<dynamic> ObtenerEstadosPorPeriodo(DateTime fechaInicio, DateTime fechaFin)
+    public IEnumerable<dynamic> ObtenerEstadosPorPeriodo(
+        DateTime fechaInicio,
+        DateTime fechaFin)
     {
         using var connection = _connectionFactory.CrearConexion();
-        return connection.Query("obtenerEstadosPorPeriodo",
-            new { p_fechaInicio = fechaInicio, p_fechaFin = fechaFin },
-            commandType: CommandType.StoredProcedure);
+
+        return connection.Query(
+            "obtenerEstadosPorPeriodo",
+            new
+            {
+                p_fechaInicio = fechaInicio,
+                p_fechaFin = fechaFin
+            },
+            commandType: CommandType.StoredProcedure
+        );
     }
 
-    public IEnumerable<dynamic> ObtenerTiempoPromedio(DateTime fechaInicio, DateTime fechaFin)
+    public IEnumerable<dynamic> ObtenerTiempoPromedio(
+        DateTime fechaInicio,
+        DateTime fechaFin)
     {
         using var connection = _connectionFactory.CrearConexion();
-        return connection.Query("obtenerTiempoPromedio",
-            new { p_fechaInicio = fechaInicio, p_fechaFin = fechaFin },
-            commandType: CommandType.StoredProcedure);
+
+        return connection.Query(
+            "obtenerTiempoPromedio",
+            new
+            {
+                p_fechaInicio = fechaInicio,
+                p_fechaFin = fechaFin
+            },
+            commandType: CommandType.StoredProcedure
+        );
     }
 
-    public IEnumerable<dynamic> ObtenerFacturacionPorModalidad(DateTime fechaInicio, DateTime fechaFin)
+    public IEnumerable<dynamic> ObtenerFacturacionPorModalidad(
+        DateTime fechaInicio,
+        DateTime fechaFin)
     {
         using var connection = _connectionFactory.CrearConexion();
-        return connection.Query("obtenerFacturacionPorModalidad",
-            new { p_fechaInicio = fechaInicio, p_fechaFin = fechaFin },
-            commandType: CommandType.StoredProcedure);
+
+        return connection.Query(
+            "obtenerFacturacionPorModalidad",
+            new
+            {
+                p_fechaInicio = fechaInicio,
+                p_fechaFin = fechaFin
+            },
+            commandType: CommandType.StoredProcedure
+        );
     }
 }
